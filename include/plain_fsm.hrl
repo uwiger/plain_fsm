@@ -25,3 +25,5 @@
 -compile({parse_transform, plain_fsm_xform}).
 
 
+-define(tail_apply(F,C,S),
+	plain_fsm:tail_apply(F, ?MODULE:data_vsn(), ?MODULE, C, S)).
