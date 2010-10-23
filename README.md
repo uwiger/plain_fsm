@@ -1,5 +1,13 @@
 A behaviour/support library for writing plain Erlang FSMs.
 ==========================================================
+
+Note on documentation
+---------------------
+This application now uses edown for github-friendly generation
+of edoc markup. To rebuild documentation, use:
+`./rebar get-deps`
+`./rebar compile`
+`./rebar doc`
  
 This module implements an OTP behaviour for writing plain Erlang FSMs,
 alleviating a long-standing gripe of mine that the OTP behaviours, for all
