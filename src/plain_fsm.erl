@@ -305,6 +305,22 @@ spawn_opt(Node, Mod, StartF, Opts) when is_function(StartF) ->
                                      init(Mod, StartF, ParentPid)
                              end, Opts).
 
+
+%% @spec start_opt(Mod::atom(), InitF::function(), Timeout::integer(),
+%%                 Opts::list()) -> {ok, pid()} | {error, Reason}
+%% @doc Similar to <code>proc_lib:start(M,F,A, Timeout, Opts)</code>.
+%%
+%% This function works in a similar fashion to <code>proc_lib:start/5</code>,
+%% but takes a fun instead of a `{M,F,A}' argument.
+%%
+%% `InitF()' may return one of the following:
+%%
+%% * `{reply, Reply, Cont}', where Reply will be sent back to the parent,
+%%   and `Cont' is a continuation function with no arguments.
+%% * `{noreply, Cont}', which sends no ack message back to the parent (presumably,
+%%   this is done elsewhere in the code then).
+%% @end
+%%
 start_opt(Mod, InitF, Timeout, Opts) when is_function(InitF, 0) ->
     Parent = self(),
     Pid = proc_lib:spawn_opt(fun() ->
