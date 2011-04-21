@@ -7,13 +7,11 @@ Module plain_fsm
 * [Description](#description)
 * [Function Index](#index)
 * [Function Details](#functions)
+
+
 A behaviour/support library for writing plain Erlang FSMs.
 
 
-
-__This module defines the `plain_fsm` behaviour.__
-<br></br>
- Required callback functions: `code_change/3`, `data_vsn/0`.
 
 __Authors:__ Ulf Wiger, ([`ulf.wiger@ericsson.com`](mailto:ulf.wiger@ericsson.com)).
 
@@ -34,7 +32,7 @@ use Erlang in the first place.
 
 Only in my old age have I begun to understand fully what a sacrifice
 this is. See [
-Programming Models for Concurrency ](pots/index.html) for a detailed discussion of
+Programming Models for Concurrency ](pots/index.md) for a detailed discussion of
 the issues involved.
 
 
@@ -93,20 +91,18 @@ three choices:
 
 
 
-
 <pre>
-idle(S) ->
-Parent = plain_fsm:info(parent),
-receive
-{system, From, Req} ->
-plain_fsm:handle_system_msg(
-From, Req, S, fun(S1) -> idle(S1) end);
-{'EXIT', Parent, Reason} ->
-plain_fsm:parent_EXIT(Reason, S);
-... %% your original code here
-end.
-</pre>
-
+  idle(S) ->
+     Parent = plain_fsm:info(parent),
+     receive
+        {system, From, Req} ->
+           plain_fsm:handle_system_msg(
+               From, Req, S, fun(S1) -> idle(S1) end);
+        {'EXIT', Parent, Reason} ->
+           plain_fsm:parent_EXIT(Reason, S);
+        ... %% your original code here
+     end.
+  </pre>
 
 
 
@@ -122,17 +118,15 @@ are required callbacks when you handle system messages directly.
 
 
 
-
 <pre>
-idle(S) ->
-Parent = plain_fsm:info(parent),
-receive
-... %% your original code here
-Msg ->
-plain_fsm:handle_msg(Msg, State, fun(S1) -> idle(S1) end)
-end.
-</pre>
-
+  idle(S) ->
+     Parent = plain_fsm:info(parent),
+     receive
+        ... %% your original code here
+        Msg ->
+           plain_fsm:handle_msg(Msg, State, fun(S1) -> idle(S1) end)
+     end.
+  </pre>
 
 
 
@@ -147,15 +141,13 @@ and ignore any other message.
 
 
 
-
 <pre>
-idle(S) ->
-plain_fsm:extended_receive(
-receive
-... %% your original code
-end).
-</pre>
-
+  idle(S) ->
+     plain_fsm:extended_receive(
+        receive
+           ... %% your original code
+        end).
+  </pre>
 
 
 
@@ -185,68 +177,60 @@ suspend, resume, status inspection, and code change.
 
 
 Imagine that the code initially looked like this:
-
 <pre>
-idle(S) ->
-receive
-a ->
-io:format("going to state a~n", []),
-a(S);
-b ->
-io:format("going to state b~n", []),
-b(S)
-after 10000 ->
-io:format("timeout in idle~n", []),
-idle(S)
-end).
-</pre>
-
+  idle(S) ->
+      receive
+  	a ->
+  	    io:format("going to state a~n", []),
+  	    a(S);
+  	b ->
+  	    io:format("going to state b~n", []),
+  	    b(S)
+      after 10000 ->
+  	    io:format("timeout in idle~n", []),
+  	    idle(S)
+      end).
+  </pre>
 
 
 
 The change required to handle system messages is as follows:
-
 <pre>
-idle(S) ->
-[plain_fsm:extended_receive](#extended_receive-1)(
-receive
-a ->
-io:format("going to state a~n", []),
-a(S);
-b ->
-io:format("going to state b~n", []),
-b(S)
-after 10000 ->
-io:format("timeout in idle~n", []),
-idle(S)
-end).
-</pre>
-
+  idle(S) ->
+      <a href="#extended_receive-1">plain_fsm:extended_receive</a>(
+        receive
+            a ->
+                io:format("going to state a~n", []),
+                a(S);
+            b ->
+                io:format("going to state b~n", []),
+                b(S)
+        after 10000 ->
+                io:format("timeout in idle~n", []),
+                idle(S)
+        end).
+  </pre>
 
 
 
 In addition, we change the start function from, in this case:
-
 <pre>
-spawn_link() ->
-spawn_link(fun() ->
-process_flag(trap_exit, true),
-idle(mystate)
-end).
-</pre>
-
+  spawn_link() ->
+      spawn_link(fun() ->
+                         process_flag(trap_exit, true),
+                         idle(mystate)
+                 end).
+  </pre>
 
 
 Is changed into:
-
 <pre>
-spawn_link() ->
-[plain_fsm:spawn_link](#spawn_link-2)(?MODULE, fun() ->
-process_flag(trap_exit,true),
-idle(mystate)
-end).
-</pre>
-
+  spawn_link() ->
+      <a href="#spawn_link-2">plain_fsm:spawn_link</a>(?MODULE, fun() ->
+                                            process_flag(trap_exit,true),
+                                            idle(mystate)
+                                    end).
+  </pre>
 
 
 See also [spawn/2](#spawn-2) and [spawn_opt/3](#spawn_opt-3)
@@ -265,14 +249,12 @@ the user's callback module.</td></tr><tr><td valign="top"><a href="#extended_rec
 (for <code>sys:get_status()</code>).</td></tr><tr><td valign="top"><a href="#tail_apply-5">tail_apply/5</a></td><td>Helper function to dispatch blocking calls as tail calls.</td></tr><tr><td valign="top"><a href="#wake_up-5">wake_up/5</a></td><td></td></tr></table>
 
 
-<a name="functions"></a>
 
 
-<h2>Function Details</h2>
+<h2><a name="functions">Function Details</a></h2>
 
 
 <a name="behaviour_info-1"></a>
-
 
 <h3>behaviour_info/1</h3>
 
@@ -280,27 +262,25 @@ the user's callback module.</td></tr><tr><td valign="top"><a href="#extended_rec
 
 
 
-<tt>behaviour_info(Other::atom()) -> term()</tt>
+<pre>behaviour_info(Other::atom()) -> term()</pre>
+<br></br>
+
 
 
 
 Defines which functions this behaviour expects to be exported from
 the user's callback module. plain_fsm requires only code_change/3 to
 be present. The semantics of `Mod:code_change/3` are as follows:
-
 <pre>
-code_change(OldVsn, State, Extra) -> {ok, NewState}.
-</pre>
-
+    code_change(OldVsn, State, Extra) -> {ok, NewState}.
+  </pre>
 
 
 The above code is just like it would look like in a gen_server callback
 module.
-
 <pre>
-code_change(OldVsn, State, Extra) -> {ok, NewState, Options}.
-</pre>
-
+    code_change(OldVsn, State, Extra) -> {ok, NewState, Options}.
+  </pre>
 
 
 where `Options` may be any of 
@@ -315,9 +295,7 @@ modules during a code change.
 another continuation (point of entry into your own code after the
 code change.)
 
-
 <a name="extended_receive-1"></a>
-
 
 <h3>extended_receive/1</h3>
 
@@ -325,7 +303,9 @@ code change.)
 
 
 
-<tt>extended_receive(Expr) -> VOID</tt>
+<pre>extended_receive(Expr) -> VOID</pre>
+<br></br>
+
 
 
 
@@ -345,9 +325,7 @@ To trigger the parse_transform, include the file
 your module, and the Erlang compiler must be able to find the module
 `plain_fsm_xform.beam`. If `erlc` is used, this is
 accomplished by adding `-pa .../plain_fsm/ebin` to the
-`erlc` command.
-<a name="handle_msg-3"></a>
-
+`erlc` command.<a name="handle_msg-3"></a>
 
 <h3>handle_msg/3</h3>
 
@@ -355,7 +333,9 @@ accomplished by adding `-pa .../plain_fsm/ebin` to the
 
 
 
-<tt>handle_msg(Other::Msg, State, Cont::<a href="#type-cont">cont()</a>) -> NEVER_RETURNS</tt>
+<pre>handle_msg(Other::Msg, State, Cont::<a href="#type-cont">cont()</a>) -> NEVER_RETURNS</pre>
+<br></br>
+
 
 
 
@@ -365,18 +345,16 @@ Called in a "catch-all" clause within a receive statement.
 This function never returns. It will handle system messages
 properly and ignore anything else.
 Example:
-
 <pre>
-idle(S) ->
-receive
-...
-Msg ->
-plain_fsm:handle_msg(Msg, S, fun(S1) ->
-idle(S1)
-end)
-end.
-</pre>
-
+  idle(S) ->
+    receive
+       ...
+       Msg ->
+           plain_fsm:handle_msg(Msg, S, fun(S1) ->
+                                                 idle(S1)
+                                        end)
+    end.
+  </pre>
 
 
 
@@ -392,9 +370,7 @@ The `Cont` argument should be either a fun with one argument
 (the new state), which jumps back into the user code in the proper place,
 or it can be the name of a function (in this case, 'idle'). In the latter
 case, the function in question must be exported; in the former case, this
-is not necessary.
-<a name="handle_system_msg-4"></a>
-
+is not necessary.<a name="handle_system_msg-4"></a>
 
 <h3>handle_system_msg/4</h3>
 
@@ -402,7 +378,9 @@ is not necessary.
 
 
 
-<tt>handle_system_msg(Req, From, State, Cont::<a href="#type-cont">cont()</a>) -> NEVER_RETURNS</tt>
+<pre>handle_system_msg(Req, From, State, Cont::<a href="#type-cont">cont()</a>) -> NEVER_RETURNS</pre>
+<br></br>
+
 
 
 
@@ -412,27 +390,23 @@ Called when the process receives a system message.
 This function never returns. If the program handles system messages
 explicitly, this function can be called to handle them in the plain_fsm
 way. Example:
-
 <pre>
-idle(S) ->
-receive
-{system, From, Req} ->
-plain_fsm:handle_system_msg(From, Req, S, fun(S1) ->
-idle(S1)
-end);
-...
-end.
-</pre>
-
+  idle(S) ->
+    receive
+       {system, From, Req} ->
+           plain_fsm:handle_system_msg(From, Req, S, fun(S1) ->
+                                                            idle(S1)
+                                                     end);
+       ...
+    end.
+  </pre>
 
 
 The `Cont` argument should be either a fun with one argument
 (the new state), which jumps back into the user code in the proper place,
 or it can be the name of a function (in this case, 'idle'). In the latter
 case, the function in question must be exported; in the former case, this
-is not necessary.
-<a name="hibernate-3"></a>
-
+is not necessary.<a name="hibernate-3"></a>
 
 <h3>hibernate/3</h3>
 
@@ -440,7 +414,9 @@ is not necessary.
 
 
 
-<tt>hibernate(M::atom(), F::atom(), A::[IntState]) -> NEVER_RETURNS</tt>
+<pre>hibernate(M::atom(), F::atom(), A::[IntState]) -> NEVER_RETURNS</pre>
+<br></br>
+
 
 
 
@@ -458,9 +434,7 @@ The function `plain_fsm:wake_up/5` will begin by calling
 `Module:data_vsn()`, and if it is the same as before, simply
 call `apply(M,F,A)`. Otherwise, `Module:code_change(OldVsn,IntState, hibernate)` will be called first. This allows a plain_fsm
 behaviour module to be "bootstrapped" to a new version during hibernation.
-
 <a name="info-1"></a>
-
 
 <h3>info/1</h3>
 
@@ -468,8 +442,8 @@ behaviour module to be "bootstrapped" to a new version during hibernation.
 
 
 
-<tt>info(What::atom()) -> term()</tt>* `What = debug | name | mod | parent`
-
+<pre>info(What::atom()) -> term()</pre>
+<ul class="definitions"><li><pre>What = debug | name | mod | parent</pre></li></ul>
 
 
 
@@ -477,17 +451,13 @@ retrieves meta-data for the plain_fsm process.
 
 
 Description of available meta-data:
-
 <pre>
-debug : See the manual for sys.erl
-name  : Internal name, normally the same as the registered name.
-initially undefined, can be set via plain_fsm:store_name/1.
-mod   : Name of the callback module.
-parent: The pid() of the parent process.
-</pre>
-
-<a name="parent_EXIT-2"></a>
-
+      debug : See the manual for sys.erl
+      name  : Internal name, normally the same as the registered name.
+              initially undefined, can be set via plain_fsm:store_name/1.
+      mod   : Name of the callback module.
+      parent: The pid() of the parent process.
+    </pre><a name="parent_EXIT-2"></a>
 
 <h3>parent_EXIT/2</h3>
 
@@ -495,7 +465,9 @@ parent: The pid() of the parent process.
 
 
 
-<tt>parent_EXIT(Reason, State) -> EXIT</tt>
+<pre>parent_EXIT(Reason, State) -> EXIT</pre>
+<br></br>
+
 
 
 
@@ -504,9 +476,7 @@ Handles parent termination properly.
 
 This function is called when the parent of a plain_fsm instance dies.
 The OTP rules state that the child should die with the same reason
-as the parent (especially in the case of Reason='shutdown'.)
-<a name="spawn-2"></a>
-
+as the parent (especially in the case of Reason='shutdown'.)<a name="spawn-2"></a>
 
 <h3>spawn/2</h3>
 
@@ -514,14 +484,14 @@ as the parent (especially in the case of Reason='shutdown'.)
 
 
 
-<tt>spawn(Mod::atom(), StartF::function()) -> pid()</tt>
+<pre>spawn(Mod::atom(), StartF::function()) -> pid()</pre>
+<br></br>
+
 
 
 
 Equivalent to `proc_lib:spawn(StartF)`. This function also
-initializes the plain_fsm meta-data.
-<a name="spawn_link-2"></a>
-
+initializes the plain_fsm meta-data.<a name="spawn_link-2"></a>
 
 <h3>spawn_link/2</h3>
 
@@ -529,14 +499,14 @@ initializes the plain_fsm meta-data.
 
 
 
-<tt>spawn_link(Mod::atom(), StartF::function()) -> pid()</tt>
+<pre>spawn_link(Mod::atom(), StartF::function()) -> pid()</pre>
+<br></br>
+
 
 
 
 Equivalent to `proc_lib:spawn_link(StartF)`.
-This function also initializes the plain_fsm meta-data.
-<a name="spawn_opt-3"></a>
-
+This function also initializes the plain_fsm meta-data.<a name="spawn_opt-3"></a>
 
 <h3>spawn_opt/3</h3>
 
@@ -544,14 +514,14 @@ This function also initializes the plain_fsm meta-data.
 
 
 
-<tt>spawn_opt(Mod::atom(), StartF::function(), Opts::list()) -> pid()</tt>
+<pre>spawn_opt(Mod::atom(), StartF::function(), Opts::list()) -> pid()</pre>
+<br></br>
+
 
 
 
 Equivalent to `proc_lib:spawn_opt(StartF, Opts)`.
-This function also initializes the plain_fsm meta-data.
-<a name="spawn_opt-4"></a>
-
+This function also initializes the plain_fsm meta-data.<a name="spawn_opt-4"></a>
 
 <h3>spawn_opt/4</h3>
 
@@ -559,14 +529,14 @@ This function also initializes the plain_fsm meta-data.
 
 
 
-<tt>spawn_opt(Node::atom(), Mod::atom(), StartF::function(), Opts::list()) -> pid()</tt>
+<pre>spawn_opt(Node::atom(), Mod::atom(), StartF::function(), Opts::list()) -> pid()</pre>
+<br></br>
+
 
 
 
 Equivalent to `proc_lib:spawn_opt(Node, StartF, Opts)`.
-This function also initializes the sysFsm meta-data.
-<a name="start_opt-4"></a>
-
+This function also initializes the sysFsm meta-data.<a name="start_opt-4"></a>
 
 <h3>start_opt/4</h3>
 
@@ -576,9 +546,7 @@ This function also initializes the sysFsm meta-data.
 
 `start_opt(Mod, InitF, Timeout, Opts) -> any()`
 
-
 <a name="store_name-1"></a>
-
 
 <h3>store_name/1</h3>
 
@@ -586,7 +554,9 @@ This function also initializes the sysFsm meta-data.
 
 
 
-<tt>store_name(Name::term()) -> ok</tt>
+<pre>store_name(Name::term()) -> ok</pre>
+<br></br>
+
 
 
 
@@ -596,9 +566,7 @@ This can be used if the FSM were started as an anonymous process
 (the only kind currently supported).
 Note that this function does not register the name. The name stored
 is the one that shows up in sys:get_status/1. No restriction is made
-here regarding the data type.
-<a name="tail_apply-5"></a>
-
+here regarding the data type.<a name="tail_apply-5"></a>
 
 <h3>tail_apply/5</h3>
 
@@ -606,7 +574,9 @@ here regarding the data type.
 
 
 
-<tt>tail_apply(F::Fun, OldVsn, Module, ContF, S) -> NEVER_RETURNS</tt>
+<pre>tail_apply(F::Fun, OldVsn, Module, ContF, S) -> NEVER_RETURNS</pre>
+<br></br>
+
 
 
 
@@ -620,11 +590,9 @@ get the process killed (as the VM only holds two versions of the module).
 
 This function is most easily called using the macro
 `?tail_apply(F, ContF, S)`, which expands to
-
 <pre>
-plain_fsm:tail_apply(F, ?MODULE:data_vsn(), ?MODULE, ContF, S)
-</pre>
-
+  plain_fsm:tail_apply(F, ?MODULE:data_vsn(), ?MODULE, ContF, S)
+  </pre>
 
 
 
@@ -651,22 +619,18 @@ catch exceptions in its own try/catch pattern.
 'Status' will be `error` if `Fun()` fails, otherwise `ok`.
 
 Thus, the simplest implementation of `ContF` would be:
-
 <pre>
-ContF(ok, Result, S) ->
-handle_result(Result, S);
-ContF(error, E, _S) ->
-E().
-</pre>
-
+  ContF(ok, Result, S) ->
+      handle_result(Result, S);
+  ContF(error, E, _S) ->
+      E().
+  </pre>
 
 Note that this solution does not throw away the call stack, as
 e.g. a call to `hibernate/3` does. Thus, it is basically only
 tail-recursive as regards the calling function, placing
 plain_fsm:tail_apply/5 on the call stack rather than a function
-in the user module.
-<a name="wake_up-5"></a>
-
+in the user module.<a name="wake_up-5"></a>
 
 <h3>wake_up/5</h3>
 
@@ -676,6 +640,3 @@ in the user module.
 
 `wake_up(OldVsn, Module, M, F, A) -> any()`
 
-
-
-_Generated by EDoc, Oct 31 2010, 18:34:37._
