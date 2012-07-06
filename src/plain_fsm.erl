@@ -31,9 +31,8 @@
 %% use Erlang in the first place.</p>
 %%
 %% <p>Only in my old age have I begun to understand fully what a sacrifice
-%% this is. See <a href="pots/index.html">
-%% Programming Models for Concurrency </a> for a detailed discussion of 
-%% the issues involved.</p>
+%% this is. See e.g. my presentation <a href="http://www.infoq.com/presentations/Death-by-Accidental-Complexity">Death by Accidental Complexity (QCon SF 2010)</a>
+%% for a more detailed discussion of the issues involved.</p>
 %%
 %% <p>The requirements that drove us away from plain Erlang programming
 %% in the first place were:

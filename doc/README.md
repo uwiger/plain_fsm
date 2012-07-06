@@ -1,13 +1,9 @@
 
 
-<h1>The plain_fsm application</h1>
-
-The plain_fsm application
-=========================
+#The plain_fsm application#
 
 
-<h2 class="indextitle">Modules</h2>
-
+##Modules##
 
 
 <table width="100%" border="0" summary="list of modules">
