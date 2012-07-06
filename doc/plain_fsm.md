@@ -31,6 +31,7 @@ use Erlang in the first place.
 Only in my old age have I begun to understand fully what a sacrifice
 this is. See e.g. my presentation [Death by Accidental Complexity (QCon SF 2010)](http://www.infoq.com/presentations/Death-by-Accidental-Complexity)
 for a more detailed discussion of the issues involved.
+(Slides also available in the `doc/` directory of this repos)
 
 
 
