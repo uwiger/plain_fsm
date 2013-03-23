@@ -47,6 +47,9 @@
 %% needed because they are called via hibernate()
 -export([a/1, b/1]).
 
+-define(cur, plain_fsm:current_function()).
+-define(dbg(F, A), io:fwrite("[~p]~p: " ++ F, [?LINE,?cur|A])).
+
 data_vsn() ->
     5.
 
@@ -64,13 +67,13 @@ idle(S) ->
     plain_fsm:extended_receive(
       receive
 	  a ->
-	      io:format("going to state a~n", []),
+	      ?dbg("going to state a~n", []),
 	      plain_fsm:hibernate(?MODULE,a,[S]);
 	  b ->
-	      io:format("going to state b~n", []),
+	      ?dbg("going to state b~n", []),
 	      b(S)
       after 10000 ->
-	      io:format("timeout in idle~n", []),
+	      ?dbg("timeout in idle~n", []),
 	      idle(S)
       end).
 
@@ -78,26 +81,26 @@ idle(S) ->
 a(S) ->
     receive
 	b ->
-	    io:format("going to state b~n", []),
+	    ?dbg("going from to state b~n", []),
 	    eventually_b(S);
 	idle ->
-	    io:format("going to state idle~n", []),
+	    ?dbg("going to state idle~n", []),
 	    idle(S)
 %       after 10000 ->
-% 	      io:format("timeout in a~n", []),
+% 	      ?dbg("timeout in a~n", []),
 % 	      idle(S)
     end.
 
 b(S) ->
     receive
 	a ->
-	    io:format("going to state a~n", []),
+	    ?dbg("going to state a~n", []),
 	    a(S);
 	idle ->
-	    io:format("going to state idle~n", []),
+	    ?dbg("going to state idle~n", []),
 	    idle(S)
     after 10000 ->
-	    io:format("timeout in b~n", []),
+	    ?dbg("timeout in b~n", []),
 	    idle(S)
     end.
 

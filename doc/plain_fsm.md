@@ -228,7 +228,7 @@ See [behaviour_info/1](#behaviour_info-1) for details.<a name="index"></a>
 
 
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#behaviour_info-1">behaviour_info/1</a></td><td>Defines which functions this behaviour expects to be exported from
-the user's callback module.</td></tr><tr><td valign="top"><a href="#extended_receive-1">extended_receive/1</a></td><td>Virtual function used to wrap receive clauses.</td></tr><tr><td valign="top"><a href="#handle_msg-3">handle_msg/3</a></td><td>Called in a "catch-all" clause within a receive statement.</td></tr><tr><td valign="top"><a href="#handle_system_msg-4">handle_system_msg/4</a></td><td>Called when the process receives a system message.</td></tr><tr><td valign="top"><a href="#hibernate-3">hibernate/3</a></td><td>Virtual function used to wrap a call to the BIF erlang:hibernate/3.</td></tr><tr><td valign="top"><a href="#info-1">info/1</a></td><td>retrieves meta-data for the plain_fsm process.</td></tr><tr><td valign="top"><a href="#parent_EXIT-2">parent_EXIT/2</a></td><td>Handles parent termination properly.</td></tr><tr><td valign="top"><a href="#spawn-2">spawn/2</a></td><td>Equivalent to <code>proc_lib:spawn(StartF)</code>.</td></tr><tr><td valign="top"><a href="#spawn_link-2">spawn_link/2</a></td><td>Equivalent to <code>proc_lib:spawn_link(StartF)</code>.</td></tr><tr><td valign="top"><a href="#spawn_opt-3">spawn_opt/3</a></td><td>Equivalent to <code>proc_lib:spawn_opt(StartF, Opts)</code>.</td></tr><tr><td valign="top"><a href="#spawn_opt-4">spawn_opt/4</a></td><td>Equivalent to <code>proc_lib:spawn_opt(Node, StartF, Opts)</code>.</td></tr><tr><td valign="top"><a href="#start_opt-4">start_opt/4</a></td><td>Similar to <code>proc_lib:start(M,F,A, Timeout, Opts)</code>.</td></tr><tr><td valign="top"><a href="#store_name-1">store_name/1</a></td><td>stores an internal name for the FSM
+the user's callback module.</td></tr><tr><td valign="top"><a href="#current_function-0">current_function/0</a></td><td>Virtual function for extracting the current function.</td></tr><tr><td valign="top"><a href="#extended_receive-1">extended_receive/1</a></td><td>Virtual function used to wrap receive clauses.</td></tr><tr><td valign="top"><a href="#handle_msg-3">handle_msg/3</a></td><td>Called in a "catch-all" clause within a receive statement.</td></tr><tr><td valign="top"><a href="#handle_system_msg-4">handle_system_msg/4</a></td><td>Called when the process receives a system message.</td></tr><tr><td valign="top"><a href="#hibernate-3">hibernate/3</a></td><td>Virtual function used to wrap a call to the BIF erlang:hibernate/3.</td></tr><tr><td valign="top"><a href="#info-1">info/1</a></td><td>retrieves meta-data for the plain_fsm process.</td></tr><tr><td valign="top"><a href="#parent_EXIT-2">parent_EXIT/2</a></td><td>Handles parent termination properly.</td></tr><tr><td valign="top"><a href="#spawn-2">spawn/2</a></td><td>Equivalent to <code>proc_lib:spawn(StartF)</code>.</td></tr><tr><td valign="top"><a href="#spawn_link-2">spawn_link/2</a></td><td>Equivalent to <code>proc_lib:spawn_link(StartF)</code>.</td></tr><tr><td valign="top"><a href="#spawn_opt-3">spawn_opt/3</a></td><td>Equivalent to <code>proc_lib:spawn_opt(StartF, Opts)</code>.</td></tr><tr><td valign="top"><a href="#spawn_opt-4">spawn_opt/4</a></td><td>Equivalent to <code>proc_lib:spawn_opt(Node, StartF, Opts)</code>.</td></tr><tr><td valign="top"><a href="#start_opt-4">start_opt/4</a></td><td>Similar to <code>proc_lib:start(M,F,A, Timeout, Opts)</code>.</td></tr><tr><td valign="top"><a href="#store_name-1">store_name/1</a></td><td>stores an internal name for the FSM
 (for <code>sys:get_status()</code>).</td></tr><tr><td valign="top"><a href="#tail_apply-5">tail_apply/5</a></td><td>Helper function to dispatch blocking calls as tail calls.</td></tr><tr><td valign="top"><a href="#wake_up-5">wake_up/5</a></td><td></td></tr></table>
 
 
@@ -270,6 +270,21 @@ modules during a code change.
 another continuation (point of entry into your own code after the
 code change.)
 
+<a name="current_function-0"></a>
+
+###current_function/0##
+
+
+<pre>current_function() -&gt; {Module, Function, Arity}</pre>
+<br></br>
+
+
+Virtual function for extracting the current function.
+
+
+This function call is expanded by the `plain_fsm` parse transform
+into the name and arity (`{Module, Function, Arity}`) of the current
+function. It cannot be used from code that hasn't been transformed.
 <a name="extended_receive-1"></a>
 
 ###extended_receive/1##

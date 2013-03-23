@@ -84,6 +84,11 @@ xform_plainfsm(Forms) ->
 		      {?PLAIN_FSM, {hibernate, 3}} ->
 			  #context{module = Module} = Context,
 			  {hibernate(Module, Form), Acc};
+		      {?PLAIN_FSM, {current_function, 0}} ->
+			  #context{module = Mo,
+				   function = Fn,
+				   arity = Ay} = Context,
+			  {erl_parse:abstract({Mo, Fn, Ay}), Acc};
 		      _ ->
 			  {Form, Acc}
 		  end;

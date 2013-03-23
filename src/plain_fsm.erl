@@ -208,6 +208,7 @@
 	 handle_msg/3,
 	 parent_EXIT/2,
 	 store_name/1,
+	 current_function/0,
 	 info/1]).
 
 
@@ -345,6 +346,15 @@ store_name(Name) ->
     put({?MODULE,info}, I#info{sys = Sys#sys{name = Name}}),
     ok.
 
+%% @spec current_function() -> {Module, Function, Arity}
+%% @doc Virtual function for extracting the current function.
+%%  <p>This function call is expanded by the `plain_fsm' parse transform
+%%  into the name and arity (`{Module, Function, Arity}') of the current
+%%  function. It cannot be used from code that hasn't been transformed.
+%%  </p>
+%% @end
+current_function() ->
+    exit(cannot_be_called_directly).
 
 %% @spec info(What::atom()) -> term()
 %%  What = debug | name | mod | parent
