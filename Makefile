@@ -13,19 +13,24 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 ##==============================================================================
-.PHONY: all compile clean test doc
+.PHONY: all compile clean deps distclean test doc
 
-all: compile
+all: deps compile
 
-compile:
+compile: deps
 	./rebar compile
+
+deps:
+	test -d deps || ./rebar get-deps
 
 clean:
 	./rebar clean
 
-test: 
+distclean: clean
+	./rebar delete-deps
+
+test:
 	./rebar eunit
 
 doc:
 	./rebar doc
-
