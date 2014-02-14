@@ -79,7 +79,7 @@
 %%    receive
 %%       {system, From, Req} ->
 %%          plain_fsm:handle_system_msg(
-%%              From, Req, S, fun(S1) -> idle(S1) end);
+%%              Req, From, S, fun(S1) -> idle(S1) end);
 %%       {'EXIT', Parent, Reason} ->
 %%          plain_fsm:parent_EXIT(Reason, S);
 %%       ... %% your original code here
@@ -528,7 +528,7 @@ parent_EXIT(Reason, _State) ->
 %% idle(S) ->
 %%   receive
 %%      {system, From, Req} ->
-%%          plain_fsm:handle_system_msg(From, Req, S, fun(S1) ->
+%%          plain_fsm:handle_system_msg(Req, From, S, fun(S1) ->
 %%                                                           idle(S1)
 %%                                                    end);
 %%      ...
