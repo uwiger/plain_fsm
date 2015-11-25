@@ -1,9 +1,9 @@
 
 
-#The plain_fsm application#
+# The plain_fsm application #
 
 
-##Modules##
+## Modules ##
 
 
 <table width="100%" border="0" summary="list of modules">
