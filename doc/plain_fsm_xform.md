@@ -5,9 +5,10 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
 Parse transform utility for plain_fsm.
+
 __Authors:__ Ulf Wiger, ([`ulf.wiger@ericsson.com`](mailto:ulf.wiger@ericsson.com)).
+
 <a name="index"></a>
 
 ## Function Index ##
@@ -26,11 +27,9 @@ __Authors:__ Ulf Wiger, ([`ulf.wiger@ericsson.com`](mailto:ulf.wiger@ericsson.co
 
 `format_error(Other) -> any()`
 
-
 <a name="parse_transform-2"></a>
 
 ### parse_transform/2 ###
 
 `parse_transform(Forms, Options) -> any()`
-
 

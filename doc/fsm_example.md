@@ -5,6 +5,7 @@
 * [Function Details](#functions)
 
 __Behaviours:__ [`plain_fsm`](plain_fsm.md).
+
 <a name="index"></a>
 
 ## Function Index ##
@@ -23,13 +24,11 @@ __Behaviours:__ [`plain_fsm`](plain_fsm.md).
 
 `a(S) -> any()`
 
-
 <a name="b-1"></a>
 
 ### b/1 ###
 
 `b(S) -> any()`
-
 
 <a name="code_change-3"></a>
 
@@ -37,18 +36,15 @@ __Behaviours:__ [`plain_fsm`](plain_fsm.md).
 
 `code_change(OldVsn, State, Extra) -> any()`
 
-
 <a name="data_vsn-0"></a>
 
 ### data_vsn/0 ###
 
 `data_vsn() -> any()`
 
-
 <a name="spawn_link-0"></a>
 
 ### spawn_link/0 ###
 
 `spawn_link() -> any()`
-
 
