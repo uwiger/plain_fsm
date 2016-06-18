@@ -219,6 +219,8 @@
 -export([system_continue/3,
 	 system_terminate/4,
 	 system_code_change/4,
+         system_get_state/1,
+         system_replace_state/2,
 	 format_status/2]).
 
 %% Wrapper function used for waking up from hibernation
@@ -633,6 +635,33 @@ system_code_change(IntState, Module, OldVsn, Extra) ->
 	    {ok, {NewSys, NewState}}
     end.
 
+%% @spec system_get_state(Misc) -> {ok, {Options, State}}
+%%
+%% @doc Internal export; called in order to retrieve the internal state.
+%% This function is called through {@link sys:get_state/1}.
+%% See also {@link system_replace_state/2}. Note that the internal state
+%% is represented as `{Options, State}'. See {@link behaviour_info/1} for
+%% a description of valid options.
+%% @end
+system_get_state({Sys, State}) ->
+    Opts = options(Sys),
+    {ok, {Opts, State}}.
+
+%% @spec system_replace_state(StateFun, Misc) -> {ok, NewIntState, NewMisc}
+%%
+%% @doc Internal export; called in order to update internal state.
+%% This function is called through {@link sys:replace_state/2}.
+%% Note that the external representation of the state is `{Options, State}',
+%% and the options return is the 'processed' options list, possibly ignoring
+%% some elements provided by `StateFun'. See also {@link system_get_state/1}.
+%% @end
+system_replace_state(StateFun, {Sys, State}) ->
+    Opts = options(Sys),
+    {NewOpts, NewState} = StateFun({Opts, State}),
+    NewSys = process_options(NewOpts, Sys),
+    ProcessedOpts = options(NewSys),
+    {ok, {ProcessedOpts, NewState}, {NewSys, NewState}}.
+
 
 %% @hidden
 %% @spec format_status(Opt, StatusData) -> term()
@@ -703,10 +732,13 @@ process_options(Opts, Sys) ->
 	 ({mod, Mod}, S) ->
 	      S#sys{mod = Mod};
 	 ({name, Name}, S) ->
-	      S#sys{name = Name}
+	      S#sys{name = Name};
+         (_, S) ->
+              S
       end, Sys, Opts).
 
-
+options(#sys{mod = Mod, cont = Cont, name = Name}) ->
+    [{mod, Mod}, {cont, Cont}, {name, Name}].
 
 %% Copied from proc_lib.erl
 %%
