@@ -1,6 +1,6 @@
-%% -*- erlang -*-
+%% -*- erlang-indent-level: 4; indent-tabs-mode: nil -*-
 %%==============================================================================
-%% Copyright 2010 Erlang Solutions Ltd.
+%% Copyright 2014-16 Ulf Wiger
 %%
 %% Licensed under the Apache License, Version 2.0 (the "License");
 %% you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 %% limitations under the License.
 %%==============================================================================
 
-%% @author Ulf Wiger <ulf.wiger@erlang-solutions.com>
+%% @author Ulf Wiger <ulf@wiger.net>
 %% @doc This is a container for plain_fsm modules.
 %% @end
 {application, plain_fsm,
@@ -25,4 +25,3 @@
         {applications, [kernel, stdlib, syntax_tools]},
   {env, []}
  ]}.
-

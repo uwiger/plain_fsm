@@ -1,5 +1,6 @@
+%% -*- erlang-indent-level: 4; indent-tabs-mode: nil -*-
 %%==============================================================================
-%% Copyright 2010 Erlang Solutions Ltd.
+%% Copyright 2014-16 Ulf Wiger
 %%
 %% Licensed under the Apache License, Version 2.0 (the "License");
 %% you may not use this file except in compliance with the License.
@@ -16,14 +17,14 @@
 
 %%-------------------------------------------------------------------
 %% File    : plain_fsm.hrl
-%% Author  : Ulf Wiger <ulf.wiger@ericsson.com>
-%% Description : 
+%% Author  : Ulf Wiger <ulf@wiger.net>
+%% Description :
 %%
-%% Created : 29 Jan 2004 by Ulf Wiger <ulf.wiger@ericsson.com>
+%% Created : 29 Jan 2004 by Ulf Wiger <ulf@wiger.net>
 %%-------------------------------------------------------------------
 
 -compile({parse_transform, plain_fsm_xform}).
 
 
 -define(tail_apply(F,C,S),
-	plain_fsm:tail_apply(F, ?MODULE:data_vsn(), ?MODULE, C, S)).
+        plain_fsm:tail_apply(F, ?MODULE:data_vsn(), ?MODULE, C, S)).
