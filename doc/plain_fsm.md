@@ -9,7 +9,7 @@ A behaviour/support library for writing plain Erlang FSMs.
 
 __This module defines the `plain_fsm` behaviour.__<br /> Required callback functions: `code_change/3`, `data_vsn/0`.
 
-__Authors:__ Ulf Wiger, ([`ulf.wiger@ericsson.com`](mailto:ulf.wiger@ericsson.com)).
+__Authors:__ Ulf Wiger, ([`ulf@wiger.net`](mailto:ulf@wiger.net)).
 
 <a name="description"></a>
 
@@ -145,15 +145,15 @@ Imagine that the code initially looked like this:
 
   idle(S) ->
       receive
-  	a ->
-  	    io:format("going to state a~n", []),
-  	    a(S);
-  	b ->
-  	    io:format("going to state b~n", []),
-  	    b(S)
+       a ->
+           io:format("going to state a~n", []),
+           a(S);
+       b ->
+           io:format("going to state b~n", []),
+           b(S)
       after 10000 ->
-  	    io:format("timeout in idle~n", []),
-  	    idle(S)
+           io:format("timeout in idle~n", []),
+           idle(S)
       end).
 ```
 
