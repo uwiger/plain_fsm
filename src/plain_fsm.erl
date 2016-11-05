@@ -515,9 +515,19 @@ tail_return(Module, OldVsn, S, ContF, Status, Res) ->
 %% <p>This function is called when the parent of a plain_fsm instance dies.
 %% The OTP rules state that the child should die with the same reason
 %% as the parent (especially in the case of Reason='shutdown'.)</p>
+%% <p>It is possible to provide a function <code>terminate</code>
+%% in the callback module. If such function is exported, it will be
+%% called as <code>Mod:terminate(Reason, State)</code>.
+%% This behaviour is borrowed from sys.erl.</p>
 %% @end
-parent_EXIT(Reason, _State) ->
-    %% no callback - don't know if there should be one...
+parent_EXIT(Reason, State) ->
+    #info{sys = #sys{mod = Mod}} = get({?MODULE, info}),
+    case erlang:function_exported(Mod, terminate, 2) of
+      true ->
+        Mod:terminate(Reason, State);
+      _ ->
+        ok
+    end,
     exit(Reason).
 
 
