@@ -37,7 +37,7 @@
 -define(ERROR(R, T, F, I),
         begin
             rpt_error(R, T, F, I),
-            throw({error,erl_syntax:get_pos(
+            throw({error,get_pos(
                            proplists:get_value(form,I)),{unknown,R}})
         end).
 
@@ -78,7 +78,7 @@ xform_plainfsm(Forms) ->
                                   Fname = Context#context.function,
                                   handle_extended_recv(Form, Fname, Acc);
                               Other ->
-                                  throw({error,erl_syntax:get_pos(Form),
+                                  throw({error,get_pos(Form),
                                          {bad_arity,Other}})
                           end;
                       {?PLAIN_FSM, {hibernate, 3}} ->
@@ -221,12 +221,13 @@ extended_recv(Arg, Fname) ->
 
 
 get_parent_expr() ->
-    {match,0,
-     {var,0,'__FSM_Parent'},
-     {call,0,{remote,0,
-              {atom,0,?PLAIN_FSM},
-              {atom,0,info}},
-      [{atom,0,parent}]}}.
+    A0 = erl_anno:new(0),
+    {match,A0,
+     {var,A0,'__FSM_Parent'},
+     {call,A0,{remote,A0,
+              {atom,A0,?PLAIN_FSM},
+              {atom,A0,info}},
+      [{atom,A0,parent}]}}.
 
 
 extend_recv(Clauses, Cont) ->
@@ -285,16 +286,16 @@ maybe_add_vsn_f(Forms) ->
                       (_) ->
                            true
                    end, Forms),
-    Line = element(2,hd(lists:reverse(Pre))),
+    Anno = element(2,hd(lists:reverse(Pre))),
     %%
     Pre1 = case is_exported(data_vsn, 0, Forms) of
                true ->
                    Pre;
                false ->
-                   Pre ++ [{attribute,Line,export,[{data_vsn,0}]}]
+                   Pre ++ [{attribute,Anno,export,[{data_vsn,0}]}]
            end,
     FunExists =
-        lists:any(fun({function,_Line,data_vsn,0,_Clauses}) ->
+        lists:any(fun({function,_Anno,data_vsn,0,_Clauses}) ->
                           true;
                      (_) ->
                           false
@@ -304,14 +305,23 @@ maybe_add_vsn_f(Forms) ->
             true ->
                 Fns;
             false ->
-                [{eof,LastLine}|RevFns] = lists:reverse(Fns),
+                [{eof,LastLocation}|RevFns] = lists:reverse(Fns),
+                Anno1 = erl_anno:new(incr_line(LastLocation, 1)),
+                Line2 = incr_line(LastLocation, 2),
+                Anno = erl_anno:new(LastLocation),
                 lists:reverse(
-                  [{eof,LastLine+2},
-                   {function,LastLine,data_vsn,0,
-                    [{clause,LastLine,[],[],[{integer,LastLine+1,0}]}]}
+                  [{eof,Line2},
+                   {function,Anno,data_vsn,0,
+                    [{clause,Anno,[],[],[{integer,Anno1,0}]}]}
                    | RevFns])
         end,
     Pre1 ++ Fns1.
+
+incr_line(Line, Incr) when is_integer(Line) ->
+    Line + Incr;
+incr_line({Line, Column}, Incr) when is_integer(Line), is_integer(Column) ->
+    {Line + Incr, Column}.
+
 
 is_exported(Fun, Arity, Forms) ->
     lists:any(fun({attribute,_,compile,export_all}) ->
@@ -321,3 +331,7 @@ is_exported(Fun, Arity, Forms) ->
                  (_) ->
                       false
               end, Forms).
+
+get_pos(Form) ->
+    Anno = erl_syntax:get_pos(Form),
+    erl_anno:location(Anno).
