@@ -696,7 +696,7 @@ format_status(Opt, StatusData) ->
                       Name
               end,
     Header = lists:concat(["Status for plain_fsm ", NameTag]),
-    Log = sys:get_debug(log, Debug, []),
+    Log = get_log(Debug),
     Specific =
         case erlang:function_exported(Mod, format_status, 2) of
             true ->
@@ -714,6 +714,19 @@ format_status(Opt, StatusData) ->
              {"Logged events", Log} |
              Specific]}].
 
+%% sys:get_log/1 was introduced in OTP 22
+-ifdef(OTP_RELEASE).
+  %% OTP 21 or higher
+  -if(?OTP_RELEASE >= 22).
+    get_log(Debug) -> sys:get_log(Debug).
+  -else.
+    %% OTP 21
+    get_log(Debug) -> sys:get_debug(log, Debug, []).
+  -endif.
+-else.
+  %% Pre-OTP 21
+  get_log(Debug) -> sys:get_debug(log, Debug, []).
+-endif.
 
 %% ================ Internal functions ==================
 
