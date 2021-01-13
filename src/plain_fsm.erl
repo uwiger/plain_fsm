@@ -241,7 +241,7 @@
                sys = #sys{}}).
 
 
--define(line(Tup), element(2, Tup)).
+-define(anno(Tup), element(2, Tup)).
 
 %% ================ Internal functions ==================
 
