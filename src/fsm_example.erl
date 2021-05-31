@@ -111,4 +111,3 @@ code_change(_OldVsn, _State, _Extra) ->
 %% Calls to hibernate can be anywhere in the code.
 eventually_b(S) ->
     plain_fsm:hibernate(?MODULE,b,[S]).
-

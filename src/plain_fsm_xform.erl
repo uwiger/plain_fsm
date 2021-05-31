@@ -306,13 +306,13 @@ maybe_add_vsn_f(Forms) ->
                 Fns;
             false ->
                 [{eof,LastLocation}|RevFns] = lists:reverse(Fns),
-                Anno1 = erl_anno:new(incr_line(LastLocation, 1)),
-                Line2 = incr_line(LastLocation, 2),
-                Anno = erl_anno:new(LastLocation),
+                Anno1 = erl_anno:new(LastLocation),
+                Anno2 = erl_anno:new(incr_line(LastLocation, 1)),
+                Anno3 = erl_anno:new(incr_line(LastLocation, 2)),
                 lists:reverse(
-                  [{eof,Line2},
-                   {function,Anno,data_vsn,0,
-                    [{clause,Anno,[],[],[{integer,Anno1,0}]}]}
+                  [{eof,Anno3},
+                   {function,Anno1,data_vsn,0,
+                    [{clause,Anno1,[],[],[{integer,Anno2,0}]}]}
                    | RevFns])
         end,
     Pre1 ++ Fns1.
