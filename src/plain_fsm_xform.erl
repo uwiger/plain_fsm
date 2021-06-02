@@ -109,7 +109,7 @@ xform_plainfsm(Forms) ->
                                             erl_syntax:clause(
                                               [erl_syntax:match_expr(
                                                  erl_syntax:variable(
-                                                   '__FSM_State'),
+                                                   'FSM@@State__'),
                                                  Pat)],
                                               CGd,
                                               CBod),
@@ -223,7 +223,7 @@ extended_recv(Arg, Fname) ->
 get_parent_expr() ->
     A0 = erl_anno:new(0),
     {match,A0,
-     {var,A0,'__FSM_Parent'},
+     {var,A0,'FSM@@Parent__'},
      {call,A0,{remote,A0,
               {atom,A0,?PLAIN_FSM},
               {atom,A0,info}},
@@ -233,32 +233,32 @@ get_parent_expr() ->
 extend_recv(Clauses, Cont) ->
     [erl_syntax:clause(
        [erl_syntax:tuple([erl_syntax:atom('EXIT'),
-                          erl_syntax:variable('__FSM_Parent'),
-                          erl_syntax:variable('__FSM_Reason')])],
+                          erl_syntax:variable('FSM@@Parent__'),
+                          erl_syntax:variable('FSM@@Reason__')])],
        [],
        [erl_syntax:application(
           erl_syntax:atom(?PLAIN_FSM),
           erl_syntax:atom(parent_EXIT),
-          [erl_syntax:variable('__FSM_Reason'),
-           erl_syntax:variable('__FSM_State')])]),
+          [erl_syntax:variable('FSM@@Reason__'),
+           erl_syntax:variable('FSM@@State__')])]),
      erl_syntax:clause(
        [erl_syntax:tuple([erl_syntax:atom(system),
-                          erl_syntax:variable('__FSM_From'),
-                          erl_syntax:variable('__FSM_Req')])],
+                          erl_syntax:variable('FSM@@From__'),
+                          erl_syntax:variable('FSM@@Req__')])],
        [],
        [erl_syntax:application(
           erl_syntax:atom(?PLAIN_FSM),
           erl_syntax:atom(handle_system_msg),
-          [erl_syntax:variable('__FSM_Req'),
-           erl_syntax:variable('__FSM_From'),
-           erl_syntax:variable('__FSM_State'),
+          [erl_syntax:variable('FSM@@Req__'),
+           erl_syntax:variable('FSM@@From__'),
+           erl_syntax:variable('FSM@@State__'),
            erl_syntax:fun_expr(
             [erl_syntax:clause(
-               [erl_syntax:variable('__FSM_Sx')],
+               [erl_syntax:variable('FSM@@Sx__')],
                [],
                [erl_syntax:application(
                   Cont,
-                  [erl_syntax:variable('__FSM_Sx')])])])])
+                  [erl_syntax:variable('FSM@@Sx__')])])])])
        ]) | Clauses].
 
 
