@@ -243,9 +243,29 @@
 
 -define(anno(Tup), element(2, Tup)).
 
+-type opts()::[opt()].
+-type opt()::{mod, module()} |
+             {name, atom()} |
+             {cont, atom() | fun((term()) -> term())}.
+%% <ul>
+%%  <li><code>{mod, module()}</code>, allowing you to switch callback
+%%   modules during a code change.</li>
+%%  <li><code>{name, name()}</code>, allowing you to rename the process
+%%   (note that you have to handle name registration yourself.)</li>
+%%  <li><code>{cont, atom() | function(1)}</code>, allowing you to provide
+%%   another continuation (point of entry into your own code after the
+%%   code change.)</li>
+%% </ul>
+
+-type cont()::fun((NewState::term()) -> term()) | atom().
+%% <p>Should be either a fun with one argument (the new state), which
+%% jumps back into the user code in the proper place, or it can be the
+%% name of a function. In the latter case, the function in question
+%% must be exported; in the former case, this is not necessary.</p>
+%% @end
+
 %% ================ Internal functions ==================
 
-%% @spec behaviour_info(atom()) -> term()
 %% @doc Defines which functions this behaviour expects to be exported from
 %% the user's callback module. plain_fsm requires only code_change/3 to
 %% be present. The semantics of <code>Mod:code_change/3</code> are as follows:
@@ -255,7 +275,7 @@
 %% <p>The above code is just like it would look like in a gen_server callback
 %% module.</p>
 %% <pre>
-%%   code_change(OldVsn, State, Extra) -> {ok, NewState, Options}.
+%%   code_change(OldVsn, State, Extra) -> {ok, NewState, Options::opts()}.
 %% </pre>
 %% <p>where <code>Options</code> may be any of </p>
 %% <ul>
@@ -268,30 +288,31 @@
 %%   code change.)</li>
 %% </ul>
 %% @end
+-spec behaviour_info(atom()) -> term().
 behaviour_info(callbacks) ->
     [{code_change, 3}, {data_vsn, 0}];
 behaviour_info(_Other) ->
     undefined.
 
 
-%% @spec spawn(Mod::atom(), StartF::function()) -> pid()
 %% @doc Equivalent to <code>proc_lib:spawn(StartF)</code>. This function also
 %% initializes the plain_fsm meta-data.
 %% @end
+-spec spawn(Mod::atom(), StartF::function()) -> pid().
 spawn(Mod, StartF) ->
     ?MODULE:spawn_opt(Mod, StartF, []).
 
-%% @spec spawn_link(Mod::atom(), StartF::function()) -> pid()
 %% @doc Equivalent to <code>proc_lib:spawn_link(StartF)</code>.
 %% This function also initializes the plain_fsm meta-data.
 %% @end
+-spec spawn_link(Mod::atom(), StartF::function()) -> pid().
 spawn_link(Mod, StartF) ->
     ?MODULE:spawn_opt(Mod, StartF, [link]).
 
-%% @spec spawn_opt(Mod::atom(), StartF::function(), Opts::list()) -> pid()
 %% @doc Equivalent to <code>proc_lib:spawn_opt(StartF, Opts)</code>.
 %% This function also initializes the plain_fsm meta-data.
 %% @end
+-spec spawn_opt(Mod::atom(), StartF::function(), Opts::list()) -> pid().
 spawn_opt(Mod, StartF, Opts) when is_function(StartF) ->
     ParentPid = self(),
     proc_lib:spawn_opt(fun() ->
@@ -299,10 +320,11 @@ spawn_opt(Mod, StartF, Opts) when is_function(StartF) ->
                        end, Opts).
 
 
-%% @spec spawn_opt(Node::atom(),Mod::atom(),StartF::function(),Opts::list()) -> pid()
 %% @doc Equivalent to <code>proc_lib:spawn_opt(Node, StartF, Opts)</code>.
 %% This function also initializes the sysFsm meta-data.
 %% @end
+-spec spawn_opt(Node::atom(), Mod::atom(), StartF::function(),
+                Opts::list()) -> pid().
 spawn_opt(Node, Mod, StartF, Opts) when is_function(StartF) ->
     ParentPid = self(),
     proc_lib:spawn_opt(Node, fun() ->
@@ -310,8 +332,6 @@ spawn_opt(Node, Mod, StartF, Opts) when is_function(StartF) ->
                              end, Opts).
 
 
-%% @spec start_opt(Mod::atom(), InitF::function(), Timeout::integer(),
-%%                 Opts::list()) -> {ok, pid()} | {error, Reason}
 %% @doc Similar to <code>proc_lib:start(M,F,A, Timeout, Opts)</code>.
 %%
 %% This function works in a similar fashion to <code>proc_lib:start/5</code>,
@@ -325,6 +345,11 @@ spawn_opt(Node, Mod, StartF, Opts) when is_function(StartF) ->
 %%   this is done elsewhere in the code then).
 %% @end
 %%
+-spec start_opt(Mod::module(), InitF, Timeout::timeout(),
+                Opts::list()) -> {ok, pid()} | {error, Reason::term()} when
+      InitF::fun(() -> {reply, Reply::term(), Cont} |
+                       {noreply, Cont}),
+      Cont::fun(() -> term()).
 start_opt(Mod, InitF, Timeout, Opts) when is_function(InitF, 0) ->
     Parent = self(),
     Pid = proc_lib:spawn_opt(fun() ->
@@ -334,7 +359,6 @@ start_opt(Mod, InitF, Timeout, Opts) when is_function(InitF, 0) ->
 
 
 
-%% @spec store_name(Name::term()) -> ok
 %%
 %% @doc stores an internal name for the FSM
 %%      (for <code>sys:get_status()</code>).
@@ -344,12 +368,12 @@ start_opt(Mod, InitF, Timeout, Opts) when is_function(InitF, 0) ->
 %% is the one that shows up in sys:get_status/1. No restriction is made
 %% here regarding the data type.
 %% @end
+-spec store_name(Name::term()) -> ok.
 store_name(Name) ->
     #info{sys = Sys} = I = get({?MODULE, info}),
     put({?MODULE,info}, I#info{sys = Sys#sys{name = Name}}),
     ok.
 
-%% @spec current_function() -> {Module, Function, Arity}
 %% @doc Virtual function for extracting the current function.
 %%  <p>This function call is expanded by the `plain_fsm' parse transform
 %%  into the name and arity (`{Module, Function, Arity}') of the current
@@ -359,8 +383,6 @@ store_name(Name) ->
 current_function() ->
     exit(cannot_be_called_directly).
 
-%% @spec info(What::atom()) -> term()
-%%  What = debug | name | mod | parent
 %% @doc retrieves meta-data for the plain_fsm process.
 %%  <p>Description of available meta-data:</p>
 %%   <pre>
@@ -371,6 +393,8 @@ current_function() ->
 %%     parent: The pid() of the parent process.
 %%   </pre>
 %% @end
+-spec info(What) -> term() when
+      What :: debug | name | mod | parent.
 info(What) ->
     case get({?MODULE,info}) of
         undefined ->
@@ -385,7 +409,6 @@ info(What) ->
     end.
 
 
-%% @spec extended_receive(Expr) -> VOID
 %%
 %% @doc Virtual function used to wrap receive clauses.
 %% <p>This function cannot be called directly, but is intended as a syntactic
@@ -401,10 +424,10 @@ info(What) ->
 %% accomplished by adding <code>-pa .../plain_fsm/ebin</code> to the
 %% <code>erlc</code> command.</p>
 %% @end
+-spec extended_receive(Expr::term()) -> no_return().
 extended_receive(_Expr) ->
     exit(cannot_be_called_directly).
 
-%% @spec hibernate(M::atom(), F::atom(), A::[IntState]) -> NEVER_RETURNS
 %%
 %% @doc Virtual function used to wrap a call to the BIF erlang:hibernate/3.
 %% <p>This function cannot be called directly, but translates to the call
@@ -419,6 +442,7 @@ extended_receive(_Expr) ->
 %% behaviour module to be "bootstrapped" to a new version during hibernation.
 %% </p>
 %% @end
+-spec hibernate(M::atom(), F::atom(), A::[IntState::term()]) -> no_return().
 hibernate(_M, _F, _A) ->
     exit(cannot_be_called_directly).
 
@@ -431,7 +455,6 @@ wake_up(OldVsn, Module, M, F, [S] = A) ->
             apply(M, F, [S1])
     end.
 
-%% @spec tail_apply(Fun, OldVsn, Module, ContF, S) -> NEVER_RETURNS
 %%
 %% @doc Helper function to dispatch blocking calls as tail calls.
 %% During code change, it can be a problem that processes lie in blocking
@@ -476,6 +499,8 @@ wake_up(OldVsn, Module, M, F, [S] = A) ->
 %% in the user module.
 %% @end
 %%
+-spec tail_apply(Fun::function(), OldVsn::term(), Module::module(),
+                 ContF::atom(), S::term()) -> no_return().
 tail_apply(F, OldVsn, Module, ContF, S) when is_function(F,0),
                                              is_atom(ContF) ->
     Return = fun(St,Res) ->
@@ -509,7 +534,6 @@ tail_return(Module, OldVsn, S, ContF, Status, Res) ->
     end.
 
 
-%% @spec parent_EXIT(Reason, State) -> EXIT
 %%
 %% @doc Handles parent termination properly.
 %% <p>This function is called when the parent of a plain_fsm instance dies.
@@ -520,6 +544,7 @@ tail_return(Module, OldVsn, S, ContF, Status, Res) ->
 %% called as <code>Mod:terminate(Reason, State)</code>.
 %% This behaviour is borrowed from sys.erl.</p>
 %% @end
+-spec parent_EXIT(Reason::term(), State::term()) -> term().
 parent_EXIT(Reason, State) ->
     #info{sys = #sys{mod = Mod}} = get({?MODULE, info}),
     case erlang:function_exported(Mod, terminate, 2) of
@@ -531,7 +556,6 @@ parent_EXIT(Reason, State) ->
     exit(Reason).
 
 
-%% @spec handle_system_msg(Req, From, State, Cont::cont()) -> NEVER_RETURNS
 %%
 %% @doc Called when the process receives a system message.
 %% <p>This function never returns. If the program handles system messages
@@ -553,6 +577,8 @@ parent_EXIT(Reason, State) ->
 %% case, the function in question must be exported; in the former case, this
 %% is not necessary.</p>
 %% @end
+-spec handle_system_msg(Req::term(), From::{pid(), Tag::term()},
+                        State::term(), Cont::cont()) -> no_return().
 handle_system_msg(Req, From, State, Cont) ->
     #info{parent = Parent, debug = Debug, sys = Sys} = I =
         get({?MODULE, info}),
@@ -562,7 +588,6 @@ handle_system_msg(Req, From, State, Cont) ->
                           {Sys1, State}).
 
 
-%% @spec handle_msg(Msg, State, Cont::cont()) -> NEVER_RETURNS
 %%
 %% @doc Called in a "catch-all" clause within a receive statement.
 %% <p>This function never returns. It will handle system messages
@@ -591,6 +616,7 @@ handle_system_msg(Req, From, State, Cont) ->
 %% case, the function in question must be exported; in the former case, this
 %% is not necessary.</p>
 %% @end
+-spec handle_msg(Msg::term(), State::term(), Cont::cont()) -> no_return().
 handle_msg({system, From, Req}, State, Cont) ->
     handle_system_msg(Req, From, State, Cont);
 handle_msg(_Other, State, Cont) ->
@@ -599,10 +625,11 @@ handle_msg(_Other, State, Cont) ->
 
 
 %% @hidden
-%% @spec system_continue(Parent, Debug, IntState) -> USER_CODE
 %%
 %% @doc Internal export; handles the jump back into user code.
 %%
+-spec system_continue(Parent::pid(), Debug::[sys:dbg_opt()],
+                      IntState::term()) -> term().
 system_continue(Parent, Debug, IntState) ->
     #info{} = I = get({?MODULE, info}),
     {#sys{cont = Cont} = Sys, State} = IntState,
@@ -620,22 +647,24 @@ continue(State, Cont) when is_atom(Cont) ->
 
 
 %% @hidden
-%% @spec system_terminate(Reason, Parent, Debug, IntState) -> EXIT
 %%
 %% @doc Internal export; called if the process is ordered to terminate e g
 %% during upgrade.
 %%
+-spec system_terminate(Reason::term(), Parent::pid(), Debug::[sys:dbg_opt()],
+                       IntState::term()) -> no_return().
 system_terminate(Reason, _Parent, _Debug, _State) ->
     exit(Reason).
 
 
 %% @hidden
-%% @spec system_code_change(IntState, Module, OldVsn, Extra) ->
-%%          {ok,NewIntState}
 %%
 %% @doc Internal export; called in order to change into a newer version of
 %% the callback module.
 %%
+-spec system_code_change(IntState::term(), Module::module(), OldVsn::term(),
+                         Extra::term()) ->
+          {ok, NewIntState::term()}.
 system_code_change(IntState, Module, OldVsn, Extra) ->
     {Sys,State} = IntState,
     case apply(Module, code_change, [OldVsn, State, Extra]) of
@@ -646,19 +675,18 @@ system_code_change(IntState, Module, OldVsn, Extra) ->
             {ok, {NewSys, NewState}}
     end.
 
-%% @spec system_get_state(Misc) -> {ok, {Options, State}}
-%%
 %% @doc Internal export; called in order to retrieve the internal state.
 %% This function is called through {@link sys:get_state/1}.
 %% See also {@link system_replace_state/2}. Note that the internal state
 %% is represented as `{Options, State}'. See {@link behaviour_info/1} for
 %% a description of valid options.
 %% @end
+-spec system_get_state(Misc::term()) ->
+          {ok, IntState::{Options::opts(), State::term()}}.
 system_get_state({Sys, State}) ->
     Opts = options(Sys),
     {ok, {Opts, State}}.
 
-%% @spec system_replace_state(StateFun, Misc) -> {ok, NewIntState, NewMisc}
 %%
 %% @doc Internal export; called in order to update internal state.
 %% This function is called through {@link sys:replace_state/2}.
@@ -666,6 +694,8 @@ system_get_state({Sys, State}) ->
 %% and the options return is the 'processed' options list, possibly ignoring
 %% some elements provided by `StateFun'. See also {@link system_get_state/1}.
 %% @end
+-spec system_replace_state(StateFun::function(), Misc::term()) ->
+          {ok, NewIntState::term(), NewMisc::term()}.
 system_replace_state(StateFun, {Sys, State}) ->
     Opts = options(Sys),
     {NewOpts, NewState} = StateFun({Opts, State}),
@@ -675,7 +705,6 @@ system_replace_state(StateFun, {Sys, State}) ->
 
 
 %% @hidden
-%% @spec format_status(Opt, StatusData) -> term()
 %%
 %% @doc Internal export; called as a result of a call to sys:get_status(FSM).
 %% <p>It is possible to provide a function, <code>format_status/2</code>,
@@ -687,6 +716,7 @@ system_replace_state(StateFun, {Sys, State}) ->
 %% Mod:format_status/2 callback supported by gen_server.erl are undocumented.
 %% </p>
 %% @end
+-spec format_status(Opt::atom(), StatusData::list()) -> term().
 format_status(Opt, StatusData) ->
     [PDict, SysState, Parent, Debug, IntState] = StatusData,
     {#sys{mod = Mod, name = Name}, State} = IntState,
