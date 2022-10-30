@@ -1,5 +1,5 @@
 ##==============================================================================
-## Copyright 2014-16 Ulf Wiger
+## Copyright 2014-22 Ulf Wiger
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -13,24 +13,18 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 ##==============================================================================
-.PHONY: all compile clean deps distclean test doc
+.PHONY: all compile clean test doc
 
-all: deps compile
+all: compile
 
-compile: deps
-	./rebar compile
-
-deps:
-	test -d deps || ./rebar get-deps
+compile:
+	rebar3 compile
 
 clean:
-	./rebar clean
-
-distclean: clean
-	./rebar delete-deps
+	rebar3 clean
 
 test:
-	./rebar eunit
+	rebar3 eunit
 
 doc:
-	./rebar doc
+	rebar3 doc

@@ -212,10 +212,6 @@
          current_function/0,
          info/1]).
 
-
-%% Linter callback
--export([behaviour_info/1]).
-
 %% Callbacks used by the sys.erl module
 -export([system_continue/3,
          system_terminate/4,
@@ -243,12 +239,26 @@
 
 -define(anno(Tup), element(2, Tup)).
 
-%% ================ Internal functions ==================
+-callback code_change(OldVsn, State, Extra) -> {ok, NewState} | {error, Reason} when
+      OldVsn :: any() | {down, any()},
+      State :: any(),
+      Extra :: any(),
+      NewState :: any(),
+      Reason   :: any().
+-callback data_vsn() -> any().
+-callback format_status(Opt, StatusData) -> Status when
+      Opt :: 'normal' | 'terminate',
+      StatusData :: [PDict | State],
+      PDict :: [{Key :: term(), Value :: term()}],
+      State :: term(),
+      Status :: term().
 
-%% @spec behaviour_info(atom()) -> term()
-%% @doc Defines which functions this behaviour expects to be exported from
-%% the user's callback module. plain_fsm requires only code_change/3 to
-%% be present. The semantics of <code>Mod:code_change/3</code> are as follows:
+-optional_callbacks([ data_vsn/0
+                    , format_status/2 ]).
+
+%% Callback types
+%% plain_fsm requires only code_change/3 to be present.
+%% The semantics of <code>Mod:code_change/3</code> are as follows:
 %% <pre>
 %%   code_change(OldVsn, State, Extra) -> {ok, NewState}.
 %% </pre>
@@ -268,11 +278,8 @@
 %%   code change.)</li>
 %% </ul>
 %% @end
-behaviour_info(callbacks) ->
-    [{code_change, 3}, {data_vsn, 0}];
-behaviour_info(_Other) ->
-    undefined.
 
+%% ================ Internal functions ==================
 
 %% @spec spawn(Mod::atom(), StartF::function()) -> pid()
 %% @doc Equivalent to <code>proc_lib:spawn(StartF)</code>. This function also
@@ -651,8 +658,7 @@ system_code_change(IntState, Module, OldVsn, Extra) ->
 %% @doc Internal export; called in order to retrieve the internal state.
 %% This function is called through {@link sys:get_state/1}.
 %% See also {@link system_replace_state/2}. Note that the internal state
-%% is represented as `{Options, State}'. See {@link behaviour_info/1} for
-%% a description of valid options.
+%% is represented as `{Options, State}'.
 %% @end
 system_get_state({Sys, State}) ->
     Opts = options(Sys),
