@@ -1,0 +1,173 @@
+@author <ulf@wiger.net>
+@copyright 2014-23 Ulf Wiger
+
+@title Plain FSM - Support library for wrigin textbook Erlang FSMs
+
+@doc A behaviour/support library for writing plain Erlang FSMs.
+
+<p>This library implements an OTP behaviour for writing plain Erlang FSMs,
+alleviating a long-standing gripe of mine that the OTP behaviours, for all
+their power, force programmers into a coding style that is very much
+different from that taught in the Basic Erlang Course (or the book, or
+online tutorials, ...) -- the type of programming that made us want to
+use Erlang in the first place.</p>
+
+<p>Only in my old age have I begun to understand fully what a sacrifice
+this is. See e.g. my presentation <a href="http://www.infoq.com/presentations/Death-by-Accidental-Complexity">Death by Accidental Complexity (QCon SF 2010)</a>
+for a more detailed discussion of the issues involved.
+(Slides also available in the `doc/' directory of this repos)</p>
+
+<p>The requirements that drove us away from plain Erlang programming
+in the first place were:
+<ul>
+ <li><b>The need to support <i>system messages</i></b> to control upgrade,
+   state inspection, shutdown, etc. The plain_fsm library solves this in a
+   reasonable way, I think.</li>
+ <li><b>The need for debugging support</b>. The debugging support in
+   e.g. gen_server is, I believe, rendered obsolete by the new powerful
+   trace support (and dbg) in later versions of OTP.</li>
+ <li>In the case of gen_server, <b>reducing the need to reinvent the
+   wheel</b>, a valid point, but more so for e.g. the client side of
+   gen_server:call(). In a protocol state machine, the only thing that
+   really needs reusing is the handling of system messages.</li>
+</ul>
+</p>
+
+<p>However, the behaviours provided by OTP for FSM programming,
+<code>gen_server</code> and <code>gen_fsm</code> (<code>gen_server</code>
+is perhaps a more common choice than <code>gen_fsm</code>), both have the
+distinct drawback that you cannot normally start with a classic
+Erlang design and then migrate to a behaviour without significant
+code rewrite. In addition, the two behaviours are semantically different
+from the classic Erlang design</p>
+
+<h2>Using plain_fsm</h2>
+
+<p>First, write your state machine without worrying about OTP system
+messages. Once you're happy with it, figure out where you really want
+to handle system messages. Normally, it will suffice to do it in a fairly
+stable state. A good rule of thumb is that the top-level state machine
+should handle system messages, while the transient (sub-) states
+shouldn't</p>
+
+<p>In the states where you want to handle system messages, you have
+three choices:</p>
+
+<h3>(A) Insert the system messages in the receive clause:</h3>
+
+<pre>
+idle(S) ->
+   Parent = plain_fsm:info(parent),
+   receive
+      {system, From, Req} ->
+         plain_fsm:handle_system_msg(
+             Req, From, S, fun(S1) -> idle(S1) end);
+      {'EXIT', Parent, Reason} ->
+         plain_fsm:parent_EXIT(Reason, S);
+      ... %% your original code here
+   end.
+</pre>
+
+<p>This has the advantage that everyone can understand what's going on.
+The part that plain_fsm.erl helps you with is the set of functions
+<code>system_code_change()</code>, <code>system_continue()</code>,
+<code>system_shutdown()</code>, <code>format_status()</code>, which
+are required callbacks when you handle system messages directly.</p>
+
+<h3>(B) Handle system messages and unknown messages together:</h3>
+
+<pre>
+idle(S) ->
+   Parent = plain_fsm:info(parent),
+   receive
+      ... %% your original code here
+      Msg ->
+         plain_fsm:handle_msg(Msg, State, fun(S1) -> idle(S1) end)
+   end.
+</pre>
+
+<p>This is quite convenient if the receive statement already has a
+'catch-all' clause, discarding unknown messages.
+<code>plain_fsm:handle_msg/3</code> will handle system messages properly
+and ignore any other message.</p>
+
+<h3>(C) Write a pseudo wrapper function around your receive clause:</h3>
+
+<pre>
+idle(S) ->
+   plain_fsm:extended_receive(
+      receive
+         ... %% your original code
+      end).
+</pre>
+
+<p>The function <code>plain_fsm:extended_receive/1</code> is replaced
+in a <i>parse_transform</i> into something that looks very much like
+the previous program (A). The code, as it reads, requires the reader to
+know that the transformation takes place, otherwise the semantics
+would be confusing (you cannot solve the problem using a real function
+that way.) On the plus side, this is a fairly small violation of both
+the original code and Erlang's semantics.</p>
+
+<p><i>Note that for this to work, you must include "plain_fsm.hrl"
+in your module.</i></p>
+
+<h4>Example</h4>
+<p>In the module <a href="../src/fsm_example.erl">fsm_example.erl</a>
+(included in the plain_fsm package), we choose to handle system
+messages in the idle state. The example code is runnable, and supports
+suspend, resume, status inspection, and code change.</p>
+<p>Imagine that the code initially looked like this:</p>
+<pre>
+idle(S) ->
+    receive
+     a ->
+         io:format("going to state a~n", []),
+         a(S);
+     b ->
+         io:format("going to state b~n", []),
+         b(S)
+    after 10000 ->
+         io:format("timeout in idle~n", []),
+         idle(S)
+    end).
+</pre>
+
+<p>The change required to handle system messages is as follows:</p>
+<pre>
+idle(S) ->
+    {@link extended_receive/1. plain_fsm:extended_receive}(
+      receive
+          a ->
+              io:format("going to state a~n", []),
+              a(S);
+          b ->
+              io:format("going to state b~n", []),
+              b(S)
+      after 10000 ->
+              io:format("timeout in idle~n", []),
+              idle(S)
+      end).
+</pre>
+
+<p>In addition, we change the start function from, in this case:</p>
+<pre>
+spawn_link() ->
+    spawn_link(fun() ->
+                       process_flag(trap_exit, true),
+                       idle(mystate)
+               end).
+</pre>
+<p>Is changed into:</p>
+<pre>
+spawn_link() ->
+    {@link spawn_link/2. plain_fsm:spawn_link}(?MODULE, fun() ->
+                                          process_flag(trap_exit,true),
+                                          idle(mystate)
+                                  end).
+</pre>
+<p>See also {@link spawn/2. spawn/2} and {@link spawn_opt/3. spawn_opt/3}
+for information on other possible start functions.</p>
+<p>To be fully compliant, you also need to supply a code_change/3 function.
+See {@link behaviour_info/1. behaviour_info/1} for details.</p>
+@end
