@@ -27,4 +27,4 @@ test:
 	rebar3 eunit
 
 doc:
-	rebar3 doc
+	rebar3 edoc
