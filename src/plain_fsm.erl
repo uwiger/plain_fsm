@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4; indent-tabs-mode: nil -*-
 %%==============================================================================
-%% Copyright 2014-16 Ulf Wiger
+%% Copyright 2014-23 Ulf Wiger
 %%
 %% Licensed under the Apache License, Version 2.0 (the "License");
 %% you may not use this file except in compliance with the License.
