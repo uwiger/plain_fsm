@@ -372,7 +372,7 @@ store_name(Name) ->
 -spec current_function() -> {Module, Function, Arity} when
       Module :: atom(), Function :: atom(), Arity :: integer().
 current_function() ->
-    erlang:error(cannot_be_called_directly).
+    exit(cannot_be_called_directly).
 
 %% @doc retrieves meta-data for the plain_fsm process.
 %%  <p>Description of available meta-data:</p>
