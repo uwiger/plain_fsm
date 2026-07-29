@@ -368,6 +368,7 @@ store_name(Name) ->
 %%  function. It cannot be used from code that hasn't been transformed.
 %%  </p>
 %% @end
+-dialyzer({no_contracts, current_function/0}).
 -spec current_function() -> {Module, Function, Arity} when
       Module :: atom(), Function :: atom(), Arity :: integer().
 current_function() ->
@@ -741,13 +742,14 @@ format_status(Opt, StatusData) ->
                       Name
               end,
     Header = lists:concat(["Status for plain_fsm ", NameTag]),
-    Log = get_log(Debug),
+    Log = sys:get_log(Debug),
     Specific =
         case erlang:function_exported(Mod, format_status, 2) of
             true ->
-                case catch Mod:format_status(Opt, [PDict, State]) of
-                    {'EXIT', _} -> [{data, [{"State", State}]}];
-                    Else -> Else
+                try Mod:format_status(Opt, [PDict, State])
+                catch
+                    error:_ ->
+                        [{data, [{"State", State}]}]
                 end;
             _ ->
                 [{data, [{"State", State}]}]
@@ -758,20 +760,6 @@ format_status(Opt, StatusData) ->
              {"Parent", Parent},
              {"Logged events", Log} |
              Specific]}].
-
-%% sys:get_log/1 was introduced in OTP 22
--ifdef(OTP_RELEASE).
-  %% OTP 21 or higher
-  -if(?OTP_RELEASE >= 22).
-    get_log(Debug) -> sys:get_log(Debug).
-  -else.
-    %% OTP 21
-    get_log(Debug) -> sys:get_debug(log, Debug, []).
-  -endif.
--else.
-  %% Pre-OTP 21
-  get_log(Debug) -> sys:get_debug(log, Debug, []).
--endif.
 
 %% ================ Internal functions ==================
 
