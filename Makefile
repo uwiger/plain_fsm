@@ -24,7 +24,7 @@ clean:
 	rebar3 clean
 
 test:
-	rebar3 eunit
+	rebar3 ct
 
 doc:
 	rebar3 edoc
