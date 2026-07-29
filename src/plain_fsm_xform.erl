@@ -23,6 +23,7 @@
 %% Created : 29 Jan 2004 by Ulf Wiger <ulf@wiger.net>
 %%-------------------------------------------------------------------
 -module(plain_fsm_xform).
+-vsn("1.4.9").
 
 
 -export([parse_transform/2,

@@ -194,6 +194,7 @@
 
 
 -module(plain_fsm).
+-vsn("1.4.9").
 
 %% Functions to be used for starting the state machine:
 -export([spawn/2,
