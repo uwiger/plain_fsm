@@ -20,7 +20,7 @@
 %% @end
 {application, plain_fsm,
     [{description, "Plain_fsm library"},
-        {vsn, git},
+        {vsn, "zomp"},
         {registered, []},
         {applications, [kernel, stdlib, syntax_tools]},
   {env, []},
