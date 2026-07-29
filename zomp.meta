@@ -1,10 +1,10 @@
 {name,"plain_fsm"}.
 {type,lib}.
 {modules,[]}.
-{author,"Ulf Wiger"}.
 {prefix,none}.
 {desc,"A behavior/support library for writing plain Erlang FSMs"}.
-{package_id,{"uwiger","plain_fsm",{1,4,5}}}.
+{author,"Ulf Wiger"}.
+{package_id,{"uwiger","plain_fsm",{1,4,6}}}.
 {deps,[]}.
 {key_name,none}.
 {a_email,"ulf@wiger.net"}.
