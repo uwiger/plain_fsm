@@ -23,6 +23,7 @@
 %% Created : 28 Jan 2004 by Ulf Wiger <ulf@wiger.net>
 %%-------------------------------------------------------------------
 -module(fsm_example).
+-vsn("1.4.9").
 -behaviour(plain_fsm).
 
 %% Here's the plan:

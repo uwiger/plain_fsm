@@ -1,0 +1,10 @@
+{application,plain_fsm,
+             [{description,"Plain_fsm library"},
+              {vsn,"1.4.9"},
+              {registered,[]},
+              {applications,[kernel,stdlib,syntax_tools]},
+              {env,[]},
+              {maintainers,["Ulf Wiger"]},
+              {licenses,["Apache-2.0"]},
+              {links,[{"Github","https://github.com/uwiger/plain_fsm"}]},
+              {modules,[fsm_example,plain_fsm,plain_fsm_xform]}]}.
